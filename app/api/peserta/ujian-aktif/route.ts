@@ -1,0 +1,4 @@
+import { NextResponse } from 'next/server'; import prisma from '@/lib/prisma'; import { requirePeserta } from '@/lib/auth';
+export async function GET() { try { const u = await requirePeserta(); const now = new Date(); const exams = await prisma.ujian.findMany({where:{status:{in:['terjadwal','berlangsung']},tanggalMulai:{lte:now},tanggalSelesai:{gte:now}},include:{_count:{select:{soalUjian:true}},hasil:{where:{pesertaId:u.id}}}});
+  const res = []; for(const e of exams) { const sesi = await prisma.sesiUjian.findFirst({where:{pesertaId:u.id,ujianId:e.id,status:'aktif'}}); res.push({...e,sudahDikerjakan:e.hasil.length>0,sesiId:sesi?.id}); }
+  return NextResponse.json({data:res}); } catch(e:any){return NextResponse.json({error:e.message},{status:401});} }

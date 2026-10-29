@@ -1,0 +1,5 @@
+import { NextRequest, NextResponse } from 'next/server'; import prisma from '@/lib/prisma'; import { requirePeserta } from '@/lib/auth';
+import { serializeJson, parseJson } from '@/lib/json';
+export async function GET(req: NextRequest) { try { const u = await requirePeserta(); const sid = req.nextUrl.searchParams.get('sesiId'); const s = await prisma.sesiUjian.findFirst({where:{id:sid,pesertaId:u.id},include:{ujian:{include:{soalUjian:{include:{soal:true},orderBy:{urutan:'asc'}}}}}}); if(!s) throw new Error('Invalid');
+  const elapsed = Math.floor((Date.now()-new Date(s.waktuMulai).getTime())/1000); const sisa = Math.max(0, s.durasiDetik-elapsed);
+  return NextResponse.json({soal:s.ujian.soalUjian.map(su=>({soalUjianId:su.id,pertanyaan:su.soal.pertanyaan,pilihanA:su.soal.pilihanA,pilihanB:su.soal.pilihanB,pilihanC:su.soal.pilihanC,pilihanD:su.soal.pilihanD,pilihanE:su.soal.pilihanE})),sisaWaktuDetik:sisa,jawabanTersimpan: serializeJson(s).jawabanTersimpan}); } catch(e:any){return NextResponse.json({error:e.message},{status:401});} }

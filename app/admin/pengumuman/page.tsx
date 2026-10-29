@@ -1,0 +1,6 @@
+'use client'; import { useEffect, useState } from 'react';
+export default function Page() { const [list, setList] = useState([]); const [t, setT] = useState(''); const [i, setI] = useState('');
+  const load = async () => setList((await fetch('/api/admin/pengumuman').then(r=>r.json())).data);
+  useEffect(() => { load(); }, []);
+  const add = async () => { await fetch('/api/admin/pengumuman',{method:'POST',body:JSON.stringify({judul:t,isi:i})}); setT(''); setI(''); load(); };
+  return (<div className="animate-fade-in"><h1 className="text-2xl font-bold text-navy mb-6">Pengumuman</h1><div className="bg-white p-4 rounded shadow mb-6"><input className="w-full border p-2 rounded mb-2" placeholder="Judul" value={t} onChange={e=>setT(e.target.value)}/><textarea className="w-full border p-2 rounded mb-2" placeholder="Isi" value={i} onChange={e=>setI(e.target.value)}/><button onClick={add} className="px-4 gradient-gold text-navy rounded font-bold">Posting</button></div><div className="space-y-4">{list.map((p:any)=>(<div key={p.id} className="bg-white p-4 rounded shadow"><h3 className="font-bold">{p.judul}</h3><p className="text-sm text-gray-600">{p.isi}</p></div>))}</div></div>); }

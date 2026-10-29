@@ -1,0 +1,3 @@
+import { NextRequest, NextResponse } from 'next/server'; import prisma from '@/lib/prisma'; import { requireAdmin } from '@/lib/auth';
+export async function GET() { try { await requireAdmin(); return NextResponse.json({ data: await prisma.pengumuman.findMany({orderBy:{createdAt:'desc'}}) }); } catch(e:any){return NextResponse.json({error:e.message},{status:401});} }
+export async function POST(req: NextRequest) { try { await requireAdmin(); const b = await req.json(); await prisma.pengumuman.create({data:{judul:b.judul,isi:b.isi}}); return NextResponse.json({success:true}); } catch(e:any){return NextResponse.json({error:e.message},{status:400});} }

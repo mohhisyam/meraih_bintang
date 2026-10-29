@@ -1,0 +1,177 @@
+const fs = require('fs');
+const path = require('path');
+
+const schemaContent = `generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  namaLengkap  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Peserta {
+  id              String   @id @default(cuid())
+  nomorPeserta    String   @unique
+  namaLengkap     String
+  tempatLahir     String?
+  tanggalLahir    DateTime?
+  alamat          String?
+  whatsapp        String?
+  foto            String?
+  pinHash         String
+  statusAktif     Boolean  @default(true)
+  pinHarusGanti   Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  sesiUjian       SesiUjian[]
+  hasil           Hasil[]
+}
+
+model KategoriSoal {
+  id        String   @id @default(cuid())
+  nama      String   @unique
+  deskripsi String?
+  createdAt DateTime @default(now())
+  soal      Soal[]
+}
+
+model Soal {
+  id            String   @id @default(cuid())
+  kategoriId    String
+  pertanyaan    String
+  pilihanA      String
+  pilihanB      String
+  pilihanC      String
+  pilihanD      String
+  pilihanE      String
+  kunciJawaban  String
+  bobot         Int      @default(1)
+  gambar        String?
+  pembahasan    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  kategori      KategoriSoal @relation(fields: [kategoriId], references: [id])
+  soalUjian     SoalUjian[]
+}
+
+model Ujian {
+  id              String   @id @default(cuid())
+  nama            String
+  deskripsi       String?
+  tanggalMulai    DateTime
+  tanggalSelesai  DateTime
+  durasiMenit     Int
+  acakSoal        Boolean  @default(false)
+  acakJawaban     Boolean  @default(false)
+  passingGrade    Int      @default(70)
+  tampilkanNilai  Boolean  @default(true)
+  tampilkanPembahasan Boolean @default(false)
+  status          String   @default("draft")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  soalUjian       SoalUjian[]
+  sesiUjian       SesiUjian[]
+  hasil           Hasil[]
+}
+
+model SoalUjian {
+  id        String @id @default(cuid())
+  ujianId   String
+  soalId    String
+  urutan    Int
+  bobot     Int    @default(1)
+  ujian     Ujian  @relation(fields: [ujianId], references: [id], onDelete: Cascade)
+  soal      Soal   @relation(fields: [soalId], references: [id], onDelete: Cascade)
+  @@unique([ujianId, soalId])
+}
+
+model SesiUjian {
+  id              String   @id @default(cuid())
+  pesertaId       String
+  ujianId         String
+  token           String   @unique
+  waktuMulai      DateTime @default(now())
+  waktuSelesai    DateTime?
+  durasiDetik     Int
+  status          String   @default("aktif")
+  jawabanTersimpan Json    @default("{}")
+  ipAddress       String?
+  userAgent       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  peserta         Peserta  @relation(fields: [pesertaId], references: [id])
+  ujian           Ujian    @relation(fields: [ujianId], references: [id])
+  @@unique([pesertaId, ujianId, status])
+}
+
+model Jawaban {
+  id          String   @id @default(cuid())
+  sesiId      String
+  soalUjianId String
+  jawaban     String?
+  benar       Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@unique([sesiId, soalUjianId])
+}
+
+model Hasil {
+  id              String   @id @default(cuid())
+  sesiId          String   @unique
+  pesertaId       String
+  ujianId         String
+  totalSoal       Int
+  jawabanBenar    Int
+  jawabanSalah    Int
+  tidakDijawab    Int
+  totalBobot      Int
+  bobotDidapat    Int
+  nilai           Float
+  statusTarget    String
+  peringkat       Int?
+  selesaiPada     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  peserta         Peserta  @relation(fields: [pesertaId], references: [id])
+  ujian           Ujian    @relation(fields: [ujianId], references: [id])
+}
+
+model Pengumuman {
+  id        String   @id @default(cuid())
+  judul     String
+  isi       String
+  prioritas String   @default("normal")
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LogAktivitas {
+  id        String   @id @default(cuid())
+  userId    String?
+  userType  String?
+  aksi      String
+  detail    String?
+  ip        String?
+  createdAt DateTime @default(now())
+}
+
+model Pengaturan {
+  key   String @id
+  value String
+}
+`;
+
+const schemaPath = path.join(__dirname, 'prisma', 'schema.prisma');
+fs.writeFileSync(schemaPath, schemaContent, 'utf8');
+console.log('✅ File schema.prisma berhasil diperbaiki!');
+console.log('👉 Jalankan: npx prisma db push');

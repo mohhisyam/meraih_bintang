@@ -1,0 +1,2 @@
+export function formatDateTime(date: any) { if (!date) return '-'; return new Date(date).toLocaleString('id-ID'); }
+export function shuffleArray<T>(array: T[]) { const r = [...array]; for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }

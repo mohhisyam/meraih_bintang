@@ -1,0 +1,5 @@
+'use client'; import { useEffect, useState } from 'react';
+export default function Page() { const [list, setList] = useState([]);
+  useEffect(() => { fetch('/api/admin/peserta').then(r=>r.json()).then(d=>setList(d.data)); }, []);
+  const print = (p:any) => { const w = window.open('','_blank'); w?.document.write(`<html><head><title>Kartu ${p.nomorPeserta}</title><style>body{font-family:sans-serif;text-align:center;padding:20px;border:2px solid #0a2540;border-radius:10px;max-width:400px;margin:20px auto;}</style></head><body><h2>KARTU PESERTA</h2><h3>${p.namaLengkap}</h3><p>${p.nomorPeserta}</p><p>Try Out Meraih Bintang</p></body></html>`); w?.print(); };
+  return (<div className="animate-fade-in"><h1 className="text-2xl font-bold text-navy mb-6">Cetak Kartu</h1><div className="grid md:grid-cols-2 gap-4">{list.map((p:any)=>(<div key={p.id} className="bg-white p-4 rounded shadow flex justify-between items-center"><div><b>{p.namaLengkap}</b><br/><span className="text-xs font-mono">{p.nomorPeserta}</span></div><button onClick={()=>print(p)} className="px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm">Cetak</button></div>))}</div></div>); }

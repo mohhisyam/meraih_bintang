@@ -1,0 +1,6 @@
+'use client'; import { useEffect, useState } from 'react';
+export default function Page() { const [cats, setCats] = useState([]); const [n, setN] = useState('');
+  const load = async () => setCats((await fetch('/api/admin/kategori').then(r=>r.json())).data);
+  useEffect(() => { load(); }, []);
+  const add = async () => { if(!n) return; await fetch('/api/admin/kategori',{method:'POST',body:JSON.stringify({nama:n})}); setN(''); load(); };
+  return (<div className="animate-fade-in"><h1 className="text-2xl font-bold text-navy mb-6">Kategori Soal</h1><div className="flex gap-2 mb-6"><input className="flex-1 border p-2 rounded" value={n} onChange={e=>setN(e.target.value)} placeholder="Nama Kategori"/><button onClick={add} className="px-4 gradient-gold text-navy rounded font-bold">Tambah</button></div><div className="grid md:grid-cols-2 gap-4">{cats.map((c:any)=>(<div key={c.id} className="bg-white p-4 rounded shadow flex justify-between"><span className="font-bold">{c.nama}</span></div>))}</div></div>); }

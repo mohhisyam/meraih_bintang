@@ -1,0 +1,3 @@
+import { NextRequest, NextResponse } from 'next/server'; import prisma from '@/lib/prisma'; import { requireAdmin } from '@/lib/auth';
+export async function GET() { try { await requireAdmin(); return NextResponse.json({ data: await prisma.kategoriSoal.findMany({orderBy:{nama:'asc'}}) }); } catch(e:any){return NextResponse.json({error:e.message},{status:401});} }
+export async function POST(req: NextRequest) { try { await requireAdmin(); const {nama} = await req.json(); await prisma.kategoriSoal.create({data:{nama}}); return NextResponse.json({success:true}); } catch(e:any){return NextResponse.json({error:e.message},{status:400});} }
