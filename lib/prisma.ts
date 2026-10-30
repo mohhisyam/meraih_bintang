@@ -6,14 +6,12 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// Konfigurasi database
 const url = process.env.DATABASE_URL || 'file:./dev.db';
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
-// PERBAIKAN: Inisialisasi dengan null, bukan undefined
+// Inisialisasi dengan null (bukan undefined)
 let adapter: any = null;
 
-// Jika URL adalah Turso (libsql:// atau https://), gunakan adapter
 if (url && (url.startsWith('libsql://') || url.startsWith('https://') || url.startsWith('http://'))) {
   try {
     const client = createClient({
@@ -24,14 +22,17 @@ if (url && (url.startsWith('libsql://') || url.startsWith('https://') || url.sta
     console.log('✅ Menggunakan database Turso Cloud');
   } catch (error) {
     console.error('❌ Gagal inisialisasi adapter Turso:', error);
-    adapter = null; // Fallback ke null jika error
+    adapter = null; // Pastikan tetap null jika error
   }
 } else {
   console.log('💾 Menggunakan database SQLite Lokal');
 }
 
+// PERBAIKAN: Kirim variabel 'adapter' langsung. 
+// Jika null, Prisma akan menerimanya untuk menonaktifkan driver adapter.
+// JANGAN gunakan 'undefined' di sini!
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  adapter: adapter || undefined, // PERBAIKAN: Kirim undefined jika adapter null
+  adapter: adapter,
 });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
