@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSql } from '@prisma/adapter-libsql';
+import { PrismaLibSQL } from '@prisma/adapter-libsql'; // <-- KEMBALI KE KAPITAL (SQL)
 import { createClient } from '@libsql/client';
 
 const globalForPrisma = globalThis as unknown as {
@@ -12,10 +12,13 @@ const authToken = process.env.TURSO_AUTH_TOKEN;
 let prisma: PrismaClient;
 
 if (url.startsWith('libsql://') || url.startsWith('http://') || url.startsWith('https://')) {
-  // Inisialisasi client dan adapter dalam satu langkah untuk mencegah referensi undefined
+  // 1. Buat client libsql
   const tursoClient = createClient({ url, authToken });
-  const adapter = new PrismaLibSql(tursoClient);
   
+  // 2. Berikan ke adapter (dengan nama PrismaLibSQL yang sesuai versi 5.22.0)
+  const adapter = new PrismaLibSQL(tursoClient);
+  
+  // 3. Berikan adapter ke PrismaClient
   prisma = new PrismaClient({ adapter });
   console.log('✅ Menggunakan database Turso Cloud');
 } else {
