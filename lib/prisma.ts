@@ -1,27 +1,30 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql'; // <-- KEMBALI KE KAPITAL (SQL)
+import { PrismaLibSQL } from '@prisma/adapter-libsql';
 import { createClient } from '@libsql/client';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const url = process.env.DATABASE_URL || 'file:./dev.db';
+// PRIORITAS: Baca TURSO_URL dulu (untuk Vercel), baru fallback ke DATABASE_URL (untuk lokal)
+const dbUrl = process.env.TURSO_URL || process.env.DATABASE_URL || 'file:./dev.db';
 const authToken = process.env.TURSO_AUTH_TOKEN;
 
 let prisma: PrismaClient;
 
-if (url.startsWith('libsql://') || url.startsWith('http://') || url.startsWith('https://')) {
-  // 1. Buat client libsql
-  const tursoClient = createClient({ url, authToken });
-  
-  // 2. Berikan ke adapter (dengan nama PrismaLibSQL yang sesuai versi 5.22.0)
+// Jika URL adalah Turso (Vercel/Production)
+if (dbUrl && (dbUrl.startsWith('libsql://') || dbUrl.startsWith('http://') || dbUrl.startsWith('https://'))) {
+  const tursoClient = createClient({
+    url: dbUrl,
+    authToken: authToken,
+  });
   const adapter = new PrismaLibSQL(tursoClient);
   
-  // 3. Berikan adapter ke PrismaClient
   prisma = new PrismaClient({ adapter });
-  console.log('✅ Menggunakan database Turso Cloud');
-} else {
+  console.log('✅ Menggunakan database Turso Cloud (via Adapter)');
+} 
+// Jika URL adalah SQLite Lokal (Development di komputer)
+else {
   prisma = new PrismaClient();
   console.log('💾 Menggunakan database SQLite Lokal');
 }

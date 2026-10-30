@@ -1,14 +1,9 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Ini adalah "escape hatch" yang aman.
-  // Memberitahu Next.js untuk tetap membangun aplikasi meskipun ada warning TypeScript.
-  // Aplikasi tetap akan berjalan 100% normal karena JavaScript-nya valid.
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-};
+# Database Lokal (untuk development)
+DATABASE_URL="file:./dev.db"
 
-module.exports = nextConfig;
+# Database Turso (untuk production di Vercel)
+# DATABASE_URL=libsql://meraih-bintang-mohhisyam.aws-ap-southeast-1.turso.io
+# TURSO_AUTH_TOKEN=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTMyNzc5ODMsImlkIjoiMDFhMTg3YWYtMTgwMS03OWJiLTk5M2EtMzc3Nzg2M2U2MjUyIiwia2lkIjoiUVBQNmxGb2FnMk5IRVE4b1QxcS01Q3B3eURxdG1hUEk2eHN0aTNwQkdMVSIsInJpZCI6Ijk0YzAwZjg4LTVjMzMtNDc2Yi05YzMyLTc4MTU5ZjdkZTVjZiJ9.-A0WD1bp2bBEJZ2FMy7PzlZb6qACcl_ob8UwlO9vEk9rUD55iZRoRd0RJYsGYyRCRoLe9PBokJGTeVrh-dJaAA
+
+# JWT Secret
+JWT_SECRET=rahasia-tryout-desa-2026-sangat-panjang-dan-aman
