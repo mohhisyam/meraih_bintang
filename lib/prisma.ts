@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSql } from '@prisma/adapter-libsql';
-import { createClient } from '@libsql/client';
+import { PrismaLibSQL } from '@prisma/adapter-libsql';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -13,19 +12,17 @@ let prisma: PrismaClient;
 
 // KONDISI 1: Jika URL adalah Turso (Vercel/Production)
 if (url.startsWith('libsql://') || url.startsWith('http://') || url.startsWith('https://')) {
-  const client = createClient({
+  // PrismaLibSQL menerima object config { url, authToken } secara langsung!
+  const adapter = new PrismaLibSQL({
     url,
     authToken,
   });
-  const adapter = new PrismaLibSql(client);
-  
-  // Buat PrismaClient DENGAN adapter
   prisma = new PrismaClient({ adapter });
   console.log('✅ Menggunakan database Turso Cloud');
 } 
 // KONDISI 2: Jika URL adalah SQLite Lokal (Development di komputer)
 else {
-  // Buat PrismaClient TANPA properti adapter sama sekali
+  // Inisialisasi tanpa adapter untuk SQLite lokal
   prisma = new PrismaClient();
   console.log('💾 Menggunakan database SQLite Lokal');
 }
