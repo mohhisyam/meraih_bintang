@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaLibSQL } from '@prisma/adapter-libsql';
+import { PrismaLibSql } from '@prisma/adapter-libsql'; // <-- PERHATIKAN: huruf 'l' kecil di akhir
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -12,8 +12,8 @@ let prisma: PrismaClient;
 
 // KONDISI 1: Jika URL adalah Turso (Vercel/Production)
 if (url.startsWith('libsql://') || url.startsWith('http://') || url.startsWith('https://')) {
-  // PrismaLibSQL menerima object config { url, authToken } secara langsung!
-  const adapter = new PrismaLibSQL({
+  // PrismaLibSql menerima object config { url, authToken } secara langsung!
+  const adapter = new PrismaLibSql({
     url,
     authToken,
   });
