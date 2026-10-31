@@ -87,6 +87,7 @@ model SoalUjian {
   bobot     Int    @default(1)
   ujian     Ujian  @relation(fields: [ujianId], references: [id], onDelete: Cascade)
   soal      Soal   @relation(fields: [soalId], references: [id], onDelete: Cascade)
+  jawaban   Jawaban[]
   @@unique([ujianId, soalId])
 }
 
@@ -106,6 +107,8 @@ model SesiUjian {
   updatedAt       DateTime @updatedAt
   peserta         Peserta  @relation(fields: [pesertaId], references: [id])
   ujian           Ujian    @relation(fields: [ujianId], references: [id])
+  jawaban         Jawaban[]
+  hasil           Hasil?
   @@unique([pesertaId, ujianId, status])
 }
 
@@ -117,6 +120,8 @@ model Jawaban {
   benar       Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  sesi        SesiUjian  @relation(fields: [sesiId], references: [id])
+  soalUjian   SoalUjian  @relation(fields: [soalUjianId], references: [id])
   @@unique([sesiId, soalUjianId])
 }
 
@@ -138,6 +143,7 @@ model Hasil {
   createdAt       DateTime @default(now())
   peserta         Peserta  @relation(fields: [pesertaId], references: [id])
   ujian           Ujian    @relation(fields: [ujianId], references: [id])
+  sesiUjian       SesiUjian @relation(fields: [sesiId], references: [id])
 }
 
 model Pengumuman {
