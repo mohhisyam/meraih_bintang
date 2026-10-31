@@ -6,21 +6,23 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const dbUrl = process.env.TURSO_URL || process.env.DATABASE_URL || 'file:./dev.db';
-const authToken = process.env.TURSO_AUTH_TOKEN;
+// .trim() akan menghapus spasi/enter tersembunyi di awal/akhir
+const url = (process.env.DATABASE_URL || 'file:./dev.db').trim();
+const authToken = (process.env.TURSO_AUTH_TOKEN || '').trim();
 
 let prisma: PrismaClient;
 
-if (dbUrl && (dbUrl.startsWith('libsql://') || dbUrl.startsWith('http://') || dbUrl.startsWith('https://'))) {
-  const tursoClient = createClient({
-    url: dbUrl,
+// Jika URL dimulai dengan libsql:// (Artinya di Vercel/Production)
+if (url.startsWith('libsql://')) {
+  const client = createClient({
+    url: url,
     authToken: authToken,
   });
-  const adapter = new PrismaLibSQL(tursoClient);
-  
+  const adapter = new PrismaLibSQL(client);
   prisma = new PrismaClient({ adapter });
-  console.log('✅ Menggunakan database Turso Cloud (via Adapter)');
+  console.log('✅ Terhubung ke Turso Cloud');
 } else {
+  // Jika di komputer lokal (Development)
   prisma = new PrismaClient();
   console.log('💾 Menggunakan database SQLite Lokal');
 }
