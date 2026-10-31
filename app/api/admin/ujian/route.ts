@@ -2,24 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requireAdmin } from '@/lib/auth';
 
-// ==========================================
-// HELPER: Ubah waktu database (UTC) ke WIB
-// ==========================================
-function formatWIB(date: Date | string | null | undefined): string | null {
-  if (!date) return null;
-  const d = new Date(date);
-  return d.toLocaleString('id-ID', {
-    timeZone: 'Asia/Jakarta',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-}
-
 function hitungStatus(tanggalMulai: string | Date, tanggalSelesai: string | Date) {
   const now = new Date();
   const mulai = new Date(tanggalMulai);
@@ -41,17 +23,8 @@ export async function GET(req: NextRequest) {
         }
       }
     });
-
-    // PERBAIKAN DI SINI: Format semua tanggal ke WIB sebelum dikirim ke frontend
-    const ujianFormatted = ujian.map(u => ({
-      ...u,
-      tanggalMulai: formatWIB(u.tanggalMulai),
-      tanggalSelesai: formatWIB(u.tanggalSelesai),
-      createdAt: formatWIB(u.createdAt),
-      updatedAt: formatWIB(u.updatedAt)
-    }));
-
-    return NextResponse.json({ data: ujianFormatted });
+    // Kirim data asli (ISO String) agar frontend bisa membacanya dengan benar
+    return NextResponse.json({ data: ujian });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 401 });
   }

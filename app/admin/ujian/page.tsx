@@ -1,11 +1,29 @@
 'use client';
 import { useEffect, useState } from 'react';
 
+// ==========================================
+// HELPER: Format Tanggal ke WIB (Asia/Jakarta)
+// ==========================================
+function formatWIB(dateString: string | Date | null | undefined): string {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  
+  return date.toLocaleString('id-ID', {
+    timeZone: 'Asia/Jakarta', // Kunci agar selalu WIB
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+}
+
 export default function UjianPage() {
-  const [ujian, setUjian] = useState([]);
+  const [ujian, setUjian] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [kategori, setKategori] = useState([]);
+  const [kategori, setKategori] = useState<any[]>([]);
 
   useEffect(() => {
     loadUjian();
@@ -32,7 +50,7 @@ export default function UjianPage() {
     }
   }
 
-  async function handleSave(e) {
+  async function handleSave(e: any) {
     e.preventDefault();
     setLoading(true);
     
@@ -66,16 +84,16 @@ export default function UjianPage() {
         e.target.reset();
         loadUjian();
       } else {
-        alert(' Error: ' + result.error);
+        alert('❌ Error: ' + result.error);
       }
-    } catch (e) {
-      alert(' Gagal menyimpan ujian');
+    } catch (e: any) {
+      alert('❌ Gagal menyimpan ujian: ' + e.message);
     } finally {
       setLoading(false);
     }
   }
 
-  async function ubahStatus(id, statusBaru) {
+  async function ubahStatus(id: string, statusBaru: string) {
     if (!confirm('Ubah status ujian menjadi "' + statusBaru + '"?')) return;
     
     try {
@@ -89,14 +107,14 @@ export default function UjianPage() {
         alert('✅ Status berhasil diubah!');
         loadUjian();
       } else {
-        alert(' Gagal mengubah status');
+        alert('❌ Gagal mengubah status');
       }
-    } catch (e) {
+    } catch (e: any) {
       alert('❌ Error: ' + e.message);
     }
   }
 
-  async function hapusUjian(id) {
+  async function hapusUjian(id: string) {
     if (!confirm('Yakin ingin menghapus ujian ini?')) return;
     
     try {
@@ -105,12 +123,12 @@ export default function UjianPage() {
         alert('✅ Ujian dihapus');
         loadUjian();
       }
-    } catch (e) {
-      alert(' Gagal menghapus');
+    } catch (e: any) {
+      alert('❌ Gagal menghapus: ' + e.message);
     }
   }
 
-  const statusColor = {
+  const statusColor: any = {
     draft: 'bg-gray-100 text-gray-700',
     terjadwal: 'bg-blue-100 text-blue-700',
     berlangsung: 'bg-green-100 text-green-700',
@@ -138,7 +156,7 @@ export default function UjianPage() {
             <thead className="bg-slate-50 border-b">
               <tr>
                 <th className="px-4 py-3 text-left">Nama Ujian</th>
-                <th className="px-4 py-3 text-left">Tanggal</th>
+                <th className="px-4 py-3 text-left">Tanggal (WIB)</th>
                 <th className="px-4 py-3 text-center">Durasi</th>
                 <th className="px-4 py-3 text-center">Status</th>
                 <th className="px-4 py-3 text-center">Soal</th>
@@ -149,9 +167,12 @@ export default function UjianPage() {
               {ujian.map(u => (
                 <tr key={u.id} className="border-b hover:bg-slate-50">
                   <td className="px-4 py-3 font-medium">{u.nama}</td>
-                  <td className="px-4 py-3 text-xs">
-                    {new Date(u.tanggalMulai).toLocaleString('id-ID')} - {new Date(u.tanggalSelesai).toLocaleString('id-ID')}
+                  
+                  {/* PERBAIKAN DI SINI: Menggunakan fungsi formatWIB */}
+                  <td className="px-4 py-3 text-xs whitespace-nowrap">
+                    {formatWIB(u.tanggalMulai)} <br/> s/d <br/> {formatWIB(u.tanggalSelesai)}
                   </td>
+                  
                   <td className="px-4 py-3 text-center">{u.durasiMenit} menit</td>
                   <td className="px-4 py-3 text-center">
                     <span className={`px-2 py-1 rounded text-xs font-bold ${statusColor[u.status] || 'bg-gray-100'}`}>
