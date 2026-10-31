@@ -7,19 +7,11 @@ export async function GET(req: NextRequest, { params }: any) {
     const peserta = await requirePeserta();
     const { id } = await params;
     
+    // 1. Ambil data Hasil dulu (HAPUS include sesiUjian agar tidak error)
     const hasil = await prisma.hasil.findUnique({
       where: { id: id },
       include: {
-        ujian: true,
-        sesiUjian: {
-          include: {
-            jawaban: {
-              include: {
-                soalUjian: { include: { soal: true } }
-              }
-            }
-          }
-        }
+        ujian: true
       }
     });
     
@@ -27,7 +19,27 @@ export async function GET(req: NextRequest, { params }: any) {
       return NextResponse.json({ error: 'Hasil tidak ditemukan' }, { status: 404 });
     }
     
-    return NextResponse.json({ data: hasil });
+    // 2. Ambil data Sesi dan Jawaban secara terpisah
+    const sesi = await prisma.sesiUjian.findUnique({
+      where: { id: hasil.sesiId },
+      include: {
+        jawaban: {
+          include: {
+            soalUjian: { 
+              include: { soal: true } 
+            }
+          }
+        }
+      }
+    });
+
+    // 3. Gabungkan datanya agar frontend tidak perlu diubah
+    const dataLengkap = {
+      ...hasil,
+      sesiUjian: sesi
+    };
+    
+    return NextResponse.json({ data: dataLengkap });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 401 });
   }
