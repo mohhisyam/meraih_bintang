@@ -57,6 +57,27 @@ export default function SoalPage() {
     }
   };
 
+  // ==========================================
+  // FUNGSI BARU: Hapus Soal
+  // ==========================================
+  const hapusSoal = async (id: string, nomor: number) => {
+    if (!confirm(`⚠️ Yakin ingin menghapus soal nomor ${nomor}?\n\nTindakan ini tidak bisa dibatalkan.`)) return;
+    
+    try {
+      const res = await fetch(`/api/admin/soal/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
+        alert('✅ Soal berhasil dihapus!');
+        load(); // Refresh daftar soal
+      } else {
+        alert('❌ Gagal menghapus soal: ' + (data.error || 'Unknown error'));
+      }
+    } catch (e: any) {
+      alert('❌ Error: ' + e.message);
+    }
+  };
+
   const downloadTemplate = () => {
     window.open('/api/admin/soal/template', '_blank');
   };
@@ -103,8 +124,18 @@ export default function SoalPage() {
             Belum ada soal. Silakan tambah manual atau impor dari Excel.
           </div>
         ) : soal.map((s: any, i: number) => (
-          <div key={s.id} className="bg-white p-4 rounded-xl shadow">
-            <div className="flex items-center gap-2 mb-2">
+          <div key={s.id} className="bg-white p-4 rounded-xl shadow relative">
+            
+            {/* Tombol Hapus di Pojok Kanan Atas */}
+            <button
+              onClick={() => hapusSoal(s.id, i + 1)}
+              className="absolute top-3 right-3 px-3 py-1 bg-red-500 text-white rounded text-xs font-bold hover:bg-red-600 transition"
+              title="Hapus soal ini"
+            >
+              🗑️ Hapus
+            </button>
+
+            <div className="flex items-center gap-2 mb-2 pr-20">
               <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-bold">
                 {s.kategori?.nama || 'Umum'}
               </span>
